@@ -1,0 +1,23 @@
+{
+  "name": "Fish_Net",
+  "productName": "Fish_net",
+  "version": "1.0.0",
+  "description": "Fishing Contests for Entropia Universe",
+  "author": {
+    "name": "pixelb8 media",
+    "email": "admin@pixelb8.lol",
+    "url": "https://pixelb8.lol"
+  },
+  "license": "ISC",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "package": "electron-packager . FISH_NET --platform=win32 --arch=x64 --out=dist --overwrite --icon=assets/fishnet.ico",
+    "build-installer": "npm run package && \"C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe\" /DMyAppVersion=%npm_package_version% fishnet-installer.iss"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "electron": "^41.2.1",
+    "electron-packager": "^17.1.2"
+  }
+}

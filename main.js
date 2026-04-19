@@ -1,0 +1,244 @@
+const { app, BrowserWindow, ipcMain, dialog, shell, Tray, Menu } = require('electron');
+const path = require('path');
+const fs = require('fs');
+const os = require('os');
+const https = require('https');
+const http = require('http');
+const { net } = require('electron'); // Use Electron's native net module
+let mainWindow;
+let watcher = null;
+const mainDebug = true; 
+
+// ==========================================
+// 1. SET UP THE SINGLE INSTANCE LOCK
+// ==========================================
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+    // Another instance is running; quit this one so the link sends to the primary app
+    app.quit();
+} else {
+    // ==========================================
+    // 1.1 LISTEN FOR SECOND INSTANCE (The Handshake Receiver)
+    // ==========================================
+    app.on('second-instance', (event, commandLine) => {
+        if (mainDebug) console.log("📥 Redirect detected from browser...");
+        
+        if (mainWindow) {
+            if (mainWindow.isMinimized()) mainWindow.restore();
+            mainWindow.focus();
+
+            // Find the pixelb8:// link specifically within the command line arguments
+            const url = commandLine.find(arg => arg.startsWith('pixelb8://'));
+            if (url) {
+                if (mainDebug) console.log("🌉 Found token in redirect! Sending to UI...");
+                handleDeepLink(url);
+            }
+        }
+    });
+
+    // ==========================================
+    // 1.2 STANDARD LIFECYCLE
+    // ==========================================
+    app.whenReady().then(() => {
+        // --- 4. REGISTER PROTOCOL ---
+        if (process.defaultApp) {
+            if (process.argv.length >= 2) {
+                app.setAsDefaultProtocolClient('pixelb8', process.execPath, [path.resolve(process.argv[1])]);
+            }
+        } else {
+            app.setAsDefaultProtocolClient('pixelb8');
+        }
+
+        createWindow();
+
+        // --- 5. COLD START CHECK ---
+        // Handles cases where the app was NOT running and was opened by the link
+        const url = process.argv.find(arg => arg.startsWith('pixelb8://'));
+        if (url && mainWindow) {
+            mainWindow.webContents.once('did-finish-load', () => {
+                if (mainDebug) console.log("⏳ Cold start detected. Initializing dispatcher...");
+                // Note: If you add a splash screen later, increase this timeout
+                setTimeout(() => {
+                    handleDeepLink(url);
+                }, 2000); 
+            });
+        }
+    });
+}
+
+// ==========================================
+// 2. WINDOW INITIALIZATION
+// ==========================================
+
+let tray = null; // Prevent garbage collection
+
+function createWindow() {
+    mainWindow = new BrowserWindow({
+        width: 450,
+        height: 650,
+        frame: false, // <--- REMOVES TITLE BAR & BORDERS
+        transparent: true, // Optional: if you want rounded corners or glow
+        backgroundColor: '#00000000',
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+            nodeIntegration: false,
+            contextIsolation: true,
+            sandbox: true,
+        }
+    });
+
+    // 1. SYSTEM TRAY INITIALIZATION
+    const iconPath = path.join(__dirname, 'assets/fishnet.png'); // Ensure you have an icon.png
+    tray = new Tray(iconPath);
+    
+    const trayMenu = Menu.buildFromTemplate([
+		{ label: 'PIXELB8 OMEGA', enabled: false },
+		{ type: 'separator' },
+		{ 
+			label: 'Reload App', 
+			click: () => {
+				if (mainWindow) {
+					mainWindow.webContents.reload();
+					// Optional: Bring to front on reload
+					if (mainWindow.isMinimized()) mainWindow.restore();
+					mainWindow.focus();
+				}
+			} 
+		},
+		{ label: 'Show App', click: () => mainWindow.show() },
+		{ label: 'Hide to Tray', click: () => mainWindow.hide() },
+		{ type: 'separator' },
+		{ label: 'Exit Completely', click: () => app.quit() }
+	]);
+
+    tray.setToolTip('PIXELB8 Fishing Scout');
+    tray.setContextMenu(trayMenu);
+
+    // Double click tray icon to show app
+    tray.on('double-click', () => mainWindow.show());
+    mainWindow.loadFile('index.html');
+    // 2. CSP HEADERS (Keep your existing logic)
+    mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+        callback({
+			responseHeaders: {
+				...details.responseHeaders,
+				'Content-Security-Policy': [
+					"default-src 'self'; " +
+					"frame-src 'self' https://pixelb8lol.firebaseapp.com https://pixelb8lol.web.app; " +
+					"script-src 'self' https://www.gstatic.com https://apis.google.com; " +
+					// ADDED https://www.gstatic.com to connect-src below
+					"connect-src 'self' https://api.entropianexus.com https://*.firebaseio.com https://*.firebase.com wss://*.firebaseio.com https://www.gstatic.com https:; " +
+					"style-src 'self' 'unsafe-inline'; " +
+					"img-src 'self' data: https:;"
+				]
+			}
+        });
+    });
+
+
+}
+// ==========================================
+// 3. THE DISPATCHER
+// ==========================================
+function handleDeepLink(url) {
+    try {
+        if (url && url.includes('pixelb8://')) {
+            const cleanUrl = url.replace(/"/g, ''); 
+            const urlObj = new URL(cleanUrl);
+            const token = urlObj.searchParams.get('token');
+
+            if (token && mainWindow) {
+                if (mainDebug) console.log("🌉 MAIN: Dispatching token to Bridge...");
+
+                // Visual debug inject
+                mainWindow.webContents.executeJavaScript(`console.warn("📢 MAIN PROCESS: Passing token to UI Bridge.")`);
+
+                // Send to fishing-auth.js
+                mainWindow.webContents.send('auth-success', token);
+            }
+        }
+    } catch (e) {
+        console.error("Failed to parse deep link:", e);
+    }
+}
+
+// macOS Protocol Handler
+app.on('open-url', (event, url) => {
+    event.preventDefault();
+    handleDeepLink(url);
+});
+
+// ==========================================
+// 4. IPC BRIDGE LISTENERS
+// ==========================================
+
+ipcMain.on('open-file-dialog', async (event) => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+        properties: ['openFile'],
+        title: 'Select Entropia ChatLog.txt',
+        filters: [{ name: 'ChatLog', extensions: ['txt'] }]
+    });
+
+    if (!result.canceled && result.filePaths.length > 0) {
+        event.reply('selected-path', result.filePaths[0]);
+    }
+});
+
+ipcMain.on('open-external', (event, url) => {
+    shell.openExternal(url);
+});
+
+ipcMain.on('close-app', () => {
+    app.quit();
+});
+
+// Native Chat Log Watcher
+ipcMain.on('start-watch', (event, filePath) => {
+    if (watcher) {
+        watcher.close();
+        if (mainDebug) console.log("Watcher reset.");
+    }
+
+    if (!fs.existsSync(filePath)) {
+        console.error("File not found:", filePath);
+        return;
+    }
+
+    // Set initial size to the current size to avoid reading the whole file on start
+    let fileSize = fs.statSync(filePath).size;
+
+    watcher = fs.watch(filePath, (eventType) => {
+        if (eventType === 'change') {
+            try {
+                const stats = fs.statSync(filePath);
+                const newSize = stats.size;
+
+                if (newSize > fileSize) {
+                    const stream = fs.createReadStream(filePath, { 
+                        start: fileSize, 
+                        end: newSize,
+                        encoding: 'utf8' 
+                    });
+
+                    stream.on('data', (chunk) => {
+                        const lines = chunk.split(/\r?\n/);
+                        lines.forEach(line => {
+                            if (line.trim() && mainWindow) {
+                                // Standardized communication to the UI
+                                mainWindow.webContents.send('chat-line', line);
+                            }
+                        });
+                    });
+                    fileSize = newSize;
+                }
+            } catch (err) {
+                console.error("Watch Error:", err);
+            }
+        }
+    });
+});
+
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') app.quit();
+});
