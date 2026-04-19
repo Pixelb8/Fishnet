@@ -1962,9 +1962,12 @@ async function pushBufferToCloud() {
 }
 startBtn.onclick = async () => {
     const path = pathInput?.value?.trim();
+
+    // FAIL-SAFE: If no path, open the dialog instead of just showing an error
     if (!path) {
-        addLog("❌ ERROR: PATH_REQUIRED.", true);
-        return;
+        addLog("📂 ACTION_REQUIRED: SELECT_LOG_PATH", true);
+        window.electronAPI.openFileDialog(); 
+        return; 
     }
 
     // Determine current identity
@@ -1987,12 +1990,20 @@ startBtn.onclick = async () => {
          addLog("📡 SYNC_ENABLED: Connection Secure.");
     }
 };
+
 window.electronAPI.on('selected-path', (path) => {
     pathInput.value = path;
     localStorage.setItem('fishScout_path', path);
     addLog(`📂 Path Linked: ...\\${path.split('\\').pop()}`);
 });
-
+// On Startup: Auto-fill path from localStorage
+window.addEventListener('DOMContentLoaded', () => {
+    const savedPath = localStorage.getItem('fishScout_path');
+    if (savedPath && pathInput) {
+        pathInput.value = savedPath;
+        addLog(`📂 PATH_RESTORED: ${savedPath.split('\\').pop()}`);
+    }
+});
 // Initialization
 /**
  * RESTORE_ACTIVE_CONTEST

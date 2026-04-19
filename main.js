@@ -176,8 +176,8 @@ app.on('open-url', (event, url) => {
 ipcMain.on('open-file-dialog', async (event) => {
     const result = await dialog.showOpenDialog(mainWindow, {
         properties: ['openFile'],
-        title: 'Select Entropia ChatLog.txt',
-        filters: [{ name: 'ChatLog', extensions: ['txt'] }]
+        title: 'Select Entropia Chat.log',
+        filters: [{ name: 'chat', extensions: ['log'] }]
     });
 
     if (!result.canceled && result.filePaths.length > 0) {
