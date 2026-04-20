@@ -1,10 +1,13 @@
 # 🎣 PIXELB8: Fish_Net
-**A Sovereign Fishing Contest Monitor for Entropia Universe**
+**A Fishing Contest Monitor Concept for Entropia Universe**
 
 Fish_Net is a lightweight, desktop HUD concept designed for Entropia Universe fishing event organizers. It monitors local game logs in real-time to track catches and syncs data to a global contest leaderboard.
 
-![Main Interface](./assets/appimages/main_hud.png)
-
+![Main Interface](./assets/appimages/maintab.png)
+![Contest Interface](./assets/appimages/contesttab.png)
+![Contest Creation](./assets/appimages/contesttab-create.png)
+![Config Tab](./assets/appimages/configtab.png)
+![Admin Interface](./assets/appimages/admintab.png)
 ## ✨ Features
 * **Dual-Clock Sync:** View local time and Entropia UTC (Game Time) side-by-side for perfect contest scheduling.
 * ** Architecture:** Built with Vanilla JS/HTML/CSS—zero bloated frameworks.
