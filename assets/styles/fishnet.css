@@ -320,8 +320,8 @@ input#update-status {
 }
 div#view-mail-modal {
     position: fixed;
-    top: 150px;
-    left: 50%;
+	top: 18%;
+    left: 6%;
 	min-width: 400px;
 	width:40%;
     background-color: rgba(0, 0, 0, 0.85);
@@ -367,6 +367,10 @@ background: #111; padding: 8px; border-bottom: 1px solid #333; display: flex; ju
     min-height: 50px;
 	opacity: 0.85;
 	transition:opacity, 0.4s ease;
+}
+
+#online-users .message-item {
+    min-height: 20px;
 }
 .message-item:hover{
 	opacity:0.99;
@@ -503,13 +507,16 @@ button#btn-refresh-mail {
 
 div#user-details {
     position: fixed;
-	top: 150px;
-    left: 60%;
+	top: 35px;
+    left: 44px;
     background: #1a1919;
     border: 4px ridge var(--primary-color, #3e3e3e);
     padding: 0px;
-    width: 35%;height: fit-content;
+    width: 35%;
+	min-width: 357px;
+	height: fit-content;
     box-shadow: rgb(0, 0, 0) 0px 0px 30px;
+	z-index:10101;
 	opacity:0.85;
 }
 #view-mail-modal, #user-details {
@@ -841,7 +848,7 @@ fishnet specific
     transform: translate(-50%, -50%);
     width: 500px; /* Adjust size as needed */
     height: 500px;
-    background-image: url('../fishnetimage.png');
+    background-image: url('../fishnet.png');
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;

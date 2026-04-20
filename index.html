@@ -12,6 +12,7 @@
 		connect-src 'self' https://api.entropianexus.com https://*.firebaseio.com https://*.googleapis.com https://*.firebase.com wss://*.firebaseio.com https://www.gstatic.com;
 	">
     <title>FISH NET by Pixelb8</title>
+	<link rel="icon" type="image/png" href="assets/fishnet.png">
 	 <link rel="stylesheet" href="assets/styles/fishnet.css">
     <style>
 
@@ -219,6 +220,8 @@
 								<p id="userStatusDisplay" style="    font-style: italic;color: #999;font-size: 18px;margin: 0;">"Scanning horizon..."</p>
 							</div>
 						</div>
+						<div id="achievement-cabinet" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #222; display: flex; gap: 8px; flex-wrap: wrap;">
+						</div>
 					</div>
 
 					<div class="logged-in" id="loggedInControls" style="border-top: 1px solid #333; padding-top: 10px; margin-top: 10px;">
@@ -311,11 +314,13 @@
 				<div class="mail-tabs">
 					<button class="mail-tab-btn active">📥 INBOX</button>
 					<button class="mail-tab-btn">📤 OUTBOX</button>
+					<button class="mail-tab-btn">📡 ONLINE</button>
 					<button id="btn-refresh-mail">🔄 SYNC</button>
 				</div>
 				<div id="mail-scroll-area">
 					<div id="inbox-messages"></div>
 					<div id="outbox-messages" style="display: none;"></div>
+					<div id="online-users" style="display: none; flex-direction: column; gap: 5px; padding: 10px;"></div>
 				</div>
 				<div class="popover-footer" style="padding: 5px; font-size: 9px; text-align: center; color: #444;">SuS Communication Systems</div>
 			</div>

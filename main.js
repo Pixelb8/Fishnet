@@ -167,6 +167,7 @@ function createWindow() {
         backgroundColor: '#00000000',
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
+			autoplayPolicy: 'no-user-gesture-required',
             nodeIntegration: false,
             contextIsolation: true,
             sandbox: true,
@@ -223,14 +224,6 @@ function createWindow() {
 
 
 }
-
-ipcMain.on('set-always-on-top', (event, value) => {
-    if (mainWindow) {
-        mainWindow.setAlwaysOnTop(value, 'screen-saver'); 
-        // 'screen-saver' ensures it stays above almost everything, including taskbars
-        if (mainDebug) console.log(`📌 Always on top: ${value}`);
-    }
-});
 // ==========================================
 // 3. THE DISPATCHER
 // ==========================================
@@ -255,6 +248,45 @@ function handleDeepLink(url) {
         console.error("Failed to parse deep link:", e);
     }
 }
+
+
+// --- Inside main.js ---
+
+// Define the absolute paths using app.getAppPath() 
+// This ensures they work whether you are in dev or a compiled .exe
+const globalSoundSettings = {
+    isMuted: false,
+    soundMap: {
+        'gotmailsound': path.join(app.getAppPath(), 'assets', 'sounds', 'mail_in.mp3'),
+        'sendmailsound': path.join(app.getAppPath(), 'assets', 'sounds', 'mail_out.mp3'),
+        'startup': path.join(app.getAppPath(), 'assets', 'sounds', 'SplashSound.mp3'),
+        'ui-click': path.join(app.getAppPath(), 'assets', 'sounds', 'tabclick.mp3')
+    }
+};
+
+// Allow the UI to "Check in" and get the valid paths
+ipcMain.handle('get-sound-settings', () => {
+    return globalSoundSettings;
+});
+
+ipcMain.handle('toggle-mute', async () => {
+    globalSoundSettings.isMuted = !globalSoundSettings.isMuted;
+    // Broadcast to the window
+    if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('sound-mute-updated', globalSoundSettings.isMuted);
+    }
+    return globalSoundSettings.isMuted;
+});
+
+
+
+ipcMain.on('set-always-on-top', (event, value) => {
+    if (mainWindow) {
+        mainWindow.setAlwaysOnTop(value, 'screen-saver'); 
+        // 'screen-saver' ensures it stays above almost everything, including taskbars
+        if (mainDebug) console.log(`📌 Always on top: ${value}`);
+    }
+});
 
 // macOS Protocol Handler
 app.on('open-url', (event, url) => {
