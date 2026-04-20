@@ -191,28 +191,32 @@
 		</div>
 		<div id="settings-pane" class="tab-content" style="display:none;">
 			<div class="subtab-content" id="settingsTabA">
-				
-				 <label>LOG_FILE_LOCATION</label>
+				<div class="settings-row">
+					<label class="checkbox-container">
+						<input type="checkbox" id="always-on-top-check">
+						<span class="label-text">ALWAYS ON TOP</span>
+					</label>
+				</div>
+				<label style="margin-top: 4px;">LOG_FILE_LOCATION</label>
 				<div style="display: flex; gap: 5px; margin-bottom: 10px;">
 					<input type="text" id="path-input" placeholder="No file selected..." readonly style="flex-grow: 1; cursor: default;">
-					<button id="browse-btn" style="width: auto; padding: 0 15px; background: #222; border: 1px solid #0f0; color: #0f0; cursor: pointer;">
+					<button id="browse-btn" class="btn">
 						BROWSE
 					</button>
 				</div>
 
 				<div id="useraccountPanel" style="border: 1px solid #222; padding: 10px;">
 					<div id="userInfoContainer">
-						<p class="loggedinUsername" id="settings-username-display" style="margin:0; font-weight:bold; color:#0f0;">StrangerDanger</p>
-						<div style="font-size: 9px; color: #555; margin-bottom: 8px;">
+						<div style="font-size: 16px;color: #555;margin: 2px;">
 							<span class="userRoleIcon">👤</span> <span class="userRoleLabel">GUEST</span>
 						</div>
-						
+						<p class="loggedinUsername" id="settings-username-display" style="margin:0; font-weight:bold;color: #dfa700;font-size: 22px;">StrangerDanger</p>
 						<div class="profile-layout" style="display:flex; gap:10px;">
 							<img class="userProfileImg" id="settingsprofilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo" style="width:60px; height:60px; border:1px solid #333;">
 							<div style="flex-grow:1;">
 								<span class="entropiaName" style="display:block; font-size:11px;">Unlinked Avatar</span>
 								<p id="Userpixelcount" class="logged-in" style="margin:2px 0; color:#00ffff; font-size:10px;">0px</p>
-								<p id="userStatusDisplay" style="font-style: italic; color: #666; font-size: 9px; margin:0;">"Scanning horizon..."</p>
+								<p id="userStatusDisplay" style="    font-style: italic;color: #999;font-size: 18px;margin: 0;">"Scanning horizon..."</p>
 							</div>
 						</div>
 					</div>

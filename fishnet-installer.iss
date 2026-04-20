@@ -26,9 +26,11 @@ PrivilegesRequired=admin
 OutputBaseFilename=Fish_Net_Setup
 ; Ensure this matches your icon path
 SetupIconFile=.\assets\fishnet.ico
+WizardImageFile=.\assets\sideimage.png
+WizardSmallImageFile=.\assets\fishnet.png
 Compression=lzma
 SolidCompression=yes
-WizardStyle=modern
+WizardStyle=modern dark
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

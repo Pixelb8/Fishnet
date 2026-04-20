@@ -223,6 +223,14 @@ function createWindow() {
 
 
 }
+
+ipcMain.on('set-always-on-top', (event, value) => {
+    if (mainWindow) {
+        mainWindow.setAlwaysOnTop(value, 'screen-saver'); 
+        // 'screen-saver' ensures it stays above almost everything, including taskbars
+        if (mainDebug) console.log(`📌 Always on top: ${value}`);
+    }
+});
 // ==========================================
 // 3. THE DISPATCHER
 // ==========================================

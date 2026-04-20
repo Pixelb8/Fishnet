@@ -2455,3 +2455,9 @@ document.getElementById('reload-btn')?.addEventListener('click', () => {
         window.location.reload();
     }, 100);
 });
+const ontTopCheckbox = document.getElementById('always-on-top-check');
+
+ontTopCheckbox.addEventListener('change', (e) => {
+    const isChecked = e.target.checked;
+    window.electronAPI.setAlwaysOnTop(isChecked);
+});
