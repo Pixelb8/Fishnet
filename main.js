@@ -8,7 +8,89 @@ const { net } = require('electron'); // Use Electron's native net module
 let mainWindow;
 let watcher = null;
 const mainDebug = true; 
+const GITHUB_OWNER = "Pixelb8";
+const GITHUB_REPO = "Fishnet";
+const APP_USER_AGENT = "PIXELB8-Fish-Net";
+function checkForUpdates() {
+    const currentVersion = app.getVersion();
 
+    const options = {
+        hostname: "api.github.com",
+        path: `/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`,
+        headers: {
+            "User-Agent": USER_AGENT
+        }
+    };
+
+    https.get(options, res => {
+        let data = "";
+
+        res.on("data", chunk => data += chunk);
+        res.on("end", () => {
+            try {
+                const release = JSON.parse(data);
+                if (!release.tag_name) return;
+
+                const latestVersion = release.tag_name.replace(/^v/, "");
+
+                // Logic check: returns null if not newer, otherwise returns type
+                const updateType = getUpdateType(latestVersion, currentVersion);
+                if (!updateType) return; 
+
+                const exeAsset = release.assets?.find(a =>
+                    a.name.toLowerCase().endsWith(".exe")
+                );
+
+                dialog.showMessageBox({
+                    type: "info",
+                    title: "Update Available",
+                    message:
+                        `A new ${updateType.toUpperCase()} update is available for Fish_Net.\n\n` +
+                        `Current: ${currentVersion}\n` +
+                        `Latest: ${latestVersion}`,
+                    buttons: ["Download", "Later", "View Release Notes"],
+                    defaultId: 0,
+                    cancelId: 1
+                }).then(result => {
+                    // Download & Run Installer
+                    if (result.response === 0) {
+                        if (exeAsset?.browser_download_url) {
+                            shell.openExternal(exeAsset.browser_download_url);
+                        } else {
+                            shell.openExternal(release.html_url);
+                        }
+                    }
+
+                    // View Release Notes
+                    if (result.response === 2) {
+                        shell.openExternal(release.html_url);
+                    }
+                });
+
+            } catch (err) {
+                console.error("Update check parse error:", err);
+            }
+        });
+    }).on("error", err => {
+        console.error("Update check failed:", err);
+    });
+}
+
+// Support functions for version math
+function getUpdateType(latest, current) {
+    const l = latest.split(".").map(Number);
+    const c = current.split(".").map(Number);
+
+    if (l[0] > c[0]) return "major";
+    if (l[0] < c[0]) return null;
+
+    if (l[1] > c[1]) return "minor";
+    if (l[1] < c[1]) return null;
+
+    if (l[2] > c[2]) return "patch";
+
+    return null;
+}
 // ==========================================
 // 1. SET UP THE SINGLE INSTANCE LOCK
 // ==========================================
@@ -77,6 +159,7 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         width: 450,
         height: 650,
+		icon: path.join(__dirname, 'assets/fishnetimage.png'),
         frame: false, // <--- REMOVES TITLE BAR & BORDERS
         transparent: true, // Optional: if you want rounded corners or glow
         backgroundColor: '#00000000',

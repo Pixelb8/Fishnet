@@ -1996,6 +1996,9 @@ window.electronAPI.on('selected-path', (path) => {
     localStorage.setItem('fishScout_path', path);
     addLog(`📂 Path Linked: ...\\${path.split('\\').pop()}`);
 });
+browseBtn.onclick = () => {
+    window.electronAPI.openFileDialog();
+};
 // On Startup: Auto-fill path from localStorage
 window.addEventListener('DOMContentLoaded', () => {
     const savedPath = localStorage.getItem('fishScout_path');
@@ -2411,10 +2414,14 @@ tabButtons.forEach(btn => {
         // 3. Activate clicked tab
         btn.classList.add('active');
 
-        // 4. Show target pane
+        // 4. Show target pane with conditional layout
         const targetPane = document.getElementById(targetId);
         if (targetPane) {
-            targetPane.style.display = 'block';
+            if (targetId === 'scout-pane') {
+                targetPane.style.display = 'flex';
+            } else {
+                targetPane.style.display = 'block';
+            }
         }
         
         console.log(`📑 Switched to: ${targetId}`);
