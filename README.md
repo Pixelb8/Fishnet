@@ -13,6 +13,7 @@ If you want a contesthost role, simply ask me or any admin (currently only me)
 
 you can contact me via discord at Jaedraze, or twitch.tv/jaedraze or type /w Jimmy jimbobbityboo bo-bobbity ingame!  
 ![Main Interface](./assets/appimages/maintab.png)
+![auto update check](./assets/appimages/autoupdate.png)
 ![Contest Interface](./assets/appimages/contesttab.png)
 ![Contest Creation](./assets/appimages/contesttab-create.png)
 ![Config Tab](./assets/appimages/configtab.png)
