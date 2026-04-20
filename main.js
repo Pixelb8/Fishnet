@@ -18,7 +18,7 @@ function checkForUpdates() {
         hostname: "api.github.com",
         path: `/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`,
         headers: {
-            "User-Agent": USER_AGENT
+            "User-Agent": APP_USER_AGENT
         }
     };
 
@@ -133,7 +133,9 @@ if (!gotTheLock) {
         }
 
         createWindow();
-
+		setTimeout(() => {
+            checkForUpdates();
+        }, 3000);
         // --- 5. COLD START CHECK ---
         // Handles cases where the app was NOT running and was opened by the link
         const url = process.argv.find(arg => arg.startsWith('pixelb8://'));
